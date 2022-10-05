@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mqtt_broker:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto_broker
+    ports:
+      - 18833:18833
+      - 9001:9001
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /mosquitto/data
+      - /mosquitto/log
+  validation_module:
+    image: validation_module:1.19
+    container_name: validation_module
+    environment:
+      - BROKER_URI=mosquitto_broker
+      - BROKER_TOPIC=network_test
+      - BROKER_VALIDATION_TOPIC=validation_logs
+      - BROKER_PORT=18833
+    stdin_open: true
+    tty: true
+  sensor_simulator:
+    image: sensor_simulator:1.3
+    container_name: sensor_simulator
+    environment:
+      - BROKER_URI=mosquitto_broker
+      - BROKER_TOPIC=network_test
+      - BROKER_PORT=18833
+  listening_module:
+    image: listening_module:1.2
+    container_name: listening_module
+    environment:
+      - BROKER_URI=mosquitto_broker
+      - BROKER_VALIDATION_TOPIC=validation_logs
+      - BROKER_PORT=18833
+
+
+    
+    
